@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,9 +12,22 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	private float maxSpeed = 7;
 
+	public Text speedText;
+	public Text noiseText;
+	public Text TimerText;
+	private AudioSource audioSource;
 	private float horizontalInput;
-	private float timer;
+	private float timer = 20;
 	private float noiseRating = 0f;
+
+	private void Start()
+	{
+		noiseText.text = "Noise made: 0 dB";
+		speedText.text = "Speed: 45 MPH";
+		TimerText.text = "";
+		Countdown();
+		audioSource = GetComponent<AudioSource>();
+	}
 
 	private void Update()
 	{
@@ -25,6 +39,7 @@ public class PlayerController : MonoBehaviour
 		Move();
 		Thruster();
 		AlertNoise();
+		TimerText.text = "Time: " + timer.ToString() + "Sec";
 	}
 
 	private void UpdateHorizontalInput()
@@ -47,29 +62,33 @@ public class PlayerController : MonoBehaviour
 		{
 			speed = 11;
 			maxSpeed = 11;
-			timer = 0;
 			noiseRating++;
-			Debug.Log("Going fast");
+			audioSource.Play();
+			speedText.text = "Speed: 75 MPH";
+			noiseText.text = "Noise made: " + noiseRating.ToString() + " dB";
 			Debug.Log("Sound + 1");
 		}
 		else if (Input.GetButtonUp("Jump"))
 		{
-			timer += Time.deltaTime;
 			speed = 7;
 			maxSpeed = 7;
+			speedText.text = "Speed: 45 MPH";
 			Debug.Log("Slowing down");
-			if(timer > 1)
-			{
-				timer -= 1;
-				noiseRating++;
-				Debug.Log("Sound + 1");
-			}
+		}
+	}
+
+	private void Countdown()
+	{
+		timer -= Time.deltaTime;
+		if(timer <= 0)
+		{
+			AlertNoise();
 		}
 	}
 
 	private void AlertNoise()
 	{
-		if(noiseRating == 3)
+		if(noiseRating == 5 || timer == 0)
 		{
 			speed = 0;
 			maxSpeed = 0;
