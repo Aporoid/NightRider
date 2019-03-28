@@ -22,16 +22,18 @@ public class PlayerController : MonoBehaviour
 
 	private void Start()
 	{
+		StartCoroutine("Countdown");
+		Time.timeScale = 1;
 		noiseText.text = "Noise made: 0 dB";
 		speedText.text = "Speed: 45 MPH";
 		TimerText.text = "";
-		Countdown();
 		audioSource = GetComponent<AudioSource>();
 	}
 
 	private void Update()
 	{
 		UpdateHorizontalInput();
+		TimerText.text = "Time: " + timer.ToString() + " Sec";
 	}
 
 	private void FixedUpdate()
@@ -39,7 +41,6 @@ public class PlayerController : MonoBehaviour
 		Move();
 		Thruster();
 		AlertNoise();
-		TimerText.text = "Time: " + timer.ToString() + "Sec";
 	}
 
 	private void UpdateHorizontalInput()
@@ -49,7 +50,6 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		//transform.position += transform.forward * Time.deltaTime * speed;
 		rb2d.AddForce(Vector2.right * horizontalInput * speed);
 		Vector2 clampedVelocity = rb2d.velocity;
 		clampedVelocity.x = Mathf.Clamp(rb2d.velocity.x, -maxSpeed, maxSpeed);
@@ -77,12 +77,12 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	private void Countdown()
+	private IEnumerator Countdown()
 	{
-		timer -= Time.deltaTime;
-		if(timer <= 0)
+		while (true)
 		{
-			AlertNoise();
+			yield return new WaitForSeconds(1);
+			timer--;
 		}
 	}
 
@@ -94,5 +94,11 @@ public class PlayerController : MonoBehaviour
 			maxSpeed = 0;
 			Debug.Log("You got caught!");
 		}
+	}
+
+	public void FullStop()
+	{
+		speed = 0;
+		maxSpeed = 0;
 	}
 }
