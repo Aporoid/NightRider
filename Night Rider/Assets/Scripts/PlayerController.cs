@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
 	private AudioSource audioSource;
 	private float horizontalInput;
 	private float timer = 20;
-	private float noiseRating = 0f;
+	public float noiseRating = 0f;
 
 	private void Start()
 	{
@@ -92,6 +92,7 @@ public class PlayerController : MonoBehaviour
 		{
 			speed = 0;
 			maxSpeed = 0;
+
 			Debug.Log("You got caught!");
 		}
 	}

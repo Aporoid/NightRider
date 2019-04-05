@@ -10,9 +10,24 @@ public class EndGame : MonoBehaviour
 	[SerializeField]
 	private Text winText;
 
-	private void OnTriggerEnter2D(Collider2D collision)
+    private bool endGame = false;
+
+    private void OnTriggerEnter2D(Collider2D collision)
 	{
 		playerCont.FullStop();
-		winText.text = "You crossed the border safely!";
+        endGame = true;
+        TestEnding();
 	}
+
+    private void TestEnding()
+    {
+        if (endGame == true)
+        {
+            winText.text = "You crossed the border safely! " + "\n" + "Press any key to quit.";
+            if (Input.anyKey)
+            {
+                Application.Quit();
+            }
+        }
+    }
 }
