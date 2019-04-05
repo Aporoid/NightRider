@@ -15,12 +15,15 @@ public class PlayerController : MonoBehaviour
 	public Text speedText;
 	public Text noiseText;
 	public Text TimerText;
+
 	private AudioSource audioSource;
 	private float horizontalInput;
+    private bool engineRev = false;
 	private float timer = 20;
 	public float noiseRating = 0f;
+    private bool keepRunning = true;
 
-	private void Start()
+    private void Start()
 	{
 		StartCoroutine("Countdown");
 		Time.timeScale = 1;
@@ -34,13 +37,20 @@ public class PlayerController : MonoBehaviour
 	{
 		UpdateHorizontalInput();
 		TimerText.text = "Time: " + timer.ToString() + " Sec";
+
+        if(noiseRating < 10)
+        {
+            StartCoroutine("Thruster");
+        }
+        else if (noiseRating > 10)
+        {
+            AlertNoise();
+        }
 	}
 
 	private void FixedUpdate()
 	{
 		Move();
-		Thruster();
-		AlertNoise();
 	}
 
 	private void UpdateHorizontalInput()
@@ -56,44 +66,55 @@ public class PlayerController : MonoBehaviour
 		rb2d.velocity = clampedVelocity;
 	}
 
-	private void Thruster()
+	private IEnumerator Thruster()
 	{
-		if (Input.GetButtonDown("Jump"))
-		{
+        if (Input.GetButtonDown("Jump"))
+        {
+            engineRev = true;
+            audioSource.Play();
+        }
+        if (Input.GetButtonUp("Jump"))
+        {
+            engineRev = false;
+        }
+        while (engineRev == true)
+        {
 			speed = 11;
 			maxSpeed = 11;
-			noiseRating++;
-			audioSource.Play();
+            noiseRating += 0.01f;
 			speedText.text = "Speed: 75 MPH";
 			noiseText.text = "Noise made: " + noiseRating.ToString() + " dB";
-			Debug.Log("Sound + 1");
-		}
-		else if (Input.GetButtonUp("Jump"))
-		{
-			speed = 7;
-			maxSpeed = 7;
-			speedText.text = "Speed: 45 MPH";
-			Debug.Log("Slowing down");
-		}
+            yield return new WaitForSeconds(1);
+            if(engineRev == false)
+            {
+    			speed = 7;
+    			maxSpeed = 7;
+    			speedText.text = "Speed: 45 MPH";
+    			Debug.Log("Slowing down");
+            }
+        }
 	}
 
 	private IEnumerator Countdown()
 	{
-		while (true)
+        
+		while (keepRunning)
 		{
 			yield return new WaitForSeconds(1);
 			timer--;
+            if (timer <= 0)
+            {
+                keepRunning = false;
+            }
 		}
+
 	}
 
 	private void AlertNoise()
 	{
-		if(noiseRating == 5 || timer == 0)
+		if(noiseRating == 10f || keepRunning == false)
 		{
-			speed = 0;
-			maxSpeed = 0;
-
-			Debug.Log("You got caught!");
+            FullStop();
 		}
 	}
 
