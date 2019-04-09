@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
 	private float speed = 7;
 	[SerializeField]
 	private float maxSpeed = 7;
+	[SerializeField]
+	private Text winText;
 
 	public Text speedText;
 	public Text noiseText;
@@ -21,9 +23,11 @@ public class PlayerController : MonoBehaviour
     private bool engineRev = false;
 	private float timer = 20;
 	public float noiseRating = 0f;
+	private bool stoppingTime = false;
     private bool keepRunning = true;
+	private bool endGame = false;
 
-    private void Start()
+	private void Start()
 	{
 		StartCoroutine("Countdown");
 		Time.timeScale = 1;
@@ -38,11 +42,11 @@ public class PlayerController : MonoBehaviour
 		UpdateHorizontalInput();
 		TimerText.text = "Time: " + timer.ToString() + " Sec";
 
-        if(noiseRating < 10)
+        if(noiseRating < 5)
         {
             StartCoroutine("Thruster");
         }
-        else if (noiseRating > 10)
+        else if (noiseRating >= 5)
         {
             AlertNoise();
         }
@@ -81,7 +85,7 @@ public class PlayerController : MonoBehaviour
         {
 			speed = 11;
 			maxSpeed = 11;
-            noiseRating += 0.01f;
+            noiseRating += 0.05f;
 			speedText.text = "Speed: 75 MPH";
 			noiseText.text = "Noise made: " + noiseRating.ToString() + " dB";
             yield return new WaitForSeconds(1);
@@ -97,7 +101,6 @@ public class PlayerController : MonoBehaviour
 
 	private IEnumerator Countdown()
 	{
-        
 		while (keepRunning)
 		{
 			yield return new WaitForSeconds(1);
@@ -107,20 +110,52 @@ public class PlayerController : MonoBehaviour
                 keepRunning = false;
             }
 		}
+	}
+	private void OnTriggerEnter2D(Collider2D collider)
+	{
+		StartCoroutine("WaitTime");
+		endGame = true;
+		Ending();
+	}
 
+	private IEnumerator WaitTime()
+	{
+		while (stoppingTime)
+		{
+			yield return new WaitForSeconds(1);
+			stoppingTime = true;
+			FreezeYAxis();
+		}
+	}
+	private void Ending()
+	{
+		if (endGame == true)
+		{
+			winText.text = "You crossed the border safely! " + "\n" + "Press any key to quit.";
+			if (Input.anyKey)
+			{
+				Application.Quit();
+			}
+		}
+	}
+
+	private void FreezeYAxis()
+	{
+		rb2d.constraints = RigidbodyConstraints2D.FreezePositionY;
+		rb2d.constraints = RigidbodyConstraints2D.FreezePositionX;
 	}
 
 	private void AlertNoise()
 	{
-		if(noiseRating == 10f || keepRunning == false)
+		if(noiseRating == 5f || keepRunning == false)
 		{
-            FullStop();
+			FreezeYAxis();
+			winText.text = "You got captured! " + "\n" + "Press any key to surrender willingly...";
+			if (Input.anyKey)
+			{
+				Application.Quit();
+			}
 		}
 	}
 
-	public void FullStop()
-	{
-		speed = 0;
-		maxSpeed = 0;
-	}
 }
