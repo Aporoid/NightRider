@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -32,8 +33,8 @@ public class PlayerController : MonoBehaviour
 		StartCoroutine("Countdown");
 		Time.timeScale = 1;
 		noiseText.text = "Noise made: 0 dB";
-		speedText.text = "Speed: 45 MPH";
-		TimerText.text = "";
+		//speedText.text = "Speed: 45 MPH";
+		//TimerText.text = "";
 		audioSource = GetComponent<AudioSource>();
 	}
 
@@ -77,7 +78,7 @@ public class PlayerController : MonoBehaviour
             engineRev = true;
             audioSource.Play();
         }
-        if (Input.GetButtonUp("Jump"))
+        else if (Input.GetButtonUp("Jump"))
         {
             engineRev = false;
         }
@@ -87,7 +88,7 @@ public class PlayerController : MonoBehaviour
 			maxSpeed = 11;
             noiseRating += 0.05f;
 			speedText.text = "Speed: 75 MPH";
-			noiseText.text = "Noise made: " + noiseRating.ToString() + " dB";
+			noiseText.text = "Noise made: " + noiseRating + " dB";
             yield return new WaitForSeconds(1);
             if(engineRev == false)
             {
@@ -105,13 +106,14 @@ public class PlayerController : MonoBehaviour
 		{
 			yield return new WaitForSeconds(1);
 			timer--;
-            if (timer <= 0)
+            if (timer == 0)
             {
                 keepRunning = false;
+                AlertNoise();
             }
 		}
 	}
-	private void OnTriggerEnter2D(Collider2D collider)
+	private void OnTriggerExit2D(Collider2D collider)
 	{
 		StartCoroutine("WaitTime");
 		endGame = true;
@@ -131,11 +133,11 @@ public class PlayerController : MonoBehaviour
 	{
 		if (endGame == true)
 		{
-			winText.text = "You crossed the border safely! " + "\n" + "Press any key to quit.";
-			if (Input.anyKey)
+            winText.text = "You crossed the border safely! " + "\n" + "Press R to return to the menu.";
+			if (Input.GetKeyDown("r"))
 			{
-				Application.Quit();
-			}
+                SceneManager.LoadScene(0);
+            }
 		}
 	}
 
@@ -150,11 +152,11 @@ public class PlayerController : MonoBehaviour
 		if(noiseRating == 5f || keepRunning == false)
 		{
 			FreezeYAxis();
-			winText.text = "You got captured! " + "\n" + "Press any key to surrender willingly...";
-			if (Input.anyKey)
+			winText.text = "You got captured! " + "\n" + "Press any key to surrender willingly and return to the menu.";
+			if (Input.GetKeyDown("r"))
 			{
-				Application.Quit();
-			}
+                SceneManager.LoadScene(0);
+            }
 		}
 	}
 
