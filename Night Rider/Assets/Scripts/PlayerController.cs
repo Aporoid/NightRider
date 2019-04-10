@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -45,10 +46,11 @@ public class PlayerController : MonoBehaviour
 
         if(noiseRating < 5)
         {
-            StartCoroutine("Thruster");
+            Thruster();
         }
         else if (noiseRating >= 5)
         {
+            keepRunning = false;
             AlertNoise();
         }
 	}
@@ -71,7 +73,7 @@ public class PlayerController : MonoBehaviour
 		rb2d.velocity = clampedVelocity;
 	}
 
-	private IEnumerator Thruster()
+	private void Thruster()
 	{
         if (Input.GetButtonDown("Jump"))
         {
@@ -82,21 +84,20 @@ public class PlayerController : MonoBehaviour
         {
             engineRev = false;
         }
-        while (engineRev == true)
+        if (engineRev == true)
         {
-			speed = 11;
-			maxSpeed = 11;
+            speed = 11;
+            maxSpeed = 11;
             noiseRating += 0.05f;
-			speedText.text = "Speed: 75 MPH";
-			noiseText.text = "Noise made: " + noiseRating + " dB";
-            yield return new WaitForSeconds(1);
-            if(engineRev == false)
-            {
-    			speed = 7;
-    			maxSpeed = 7;
-    			speedText.text = "Speed: 45 MPH";
-    			Debug.Log("Slowing down");
-            }
+            speedText.text = "Speed: 75 MPH";
+            noiseText.text = "Noise made: " + String.Format("{0:0.00}",noiseRating) + " dB";
+        }
+        else if (engineRev == false)
+        {
+            speed = 7;
+            maxSpeed = 7;
+            speedText.text = "Speed: 45 MPH";
+            Debug.Log("Slowing down");
         }
 	}
 
@@ -149,7 +150,7 @@ public class PlayerController : MonoBehaviour
 
 	private void AlertNoise()
 	{
-		if(noiseRating == 5f || keepRunning == false)
+		if(!keepRunning)
 		{
 			FreezeYAxis();
 			winText.text = "You got captured! " + "\n" + "Press any key to surrender willingly and return to the menu.";
