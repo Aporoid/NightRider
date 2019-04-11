@@ -44,11 +44,11 @@ public class PlayerController : MonoBehaviour
 		UpdateHorizontalInput();
 		TimerText.text = "Time: " + timer.ToString() + " Sec";
 
-        if(noiseRating < 5)
+        if(noiseRating < 20)
         {
             Thruster();
         }
-        else if (noiseRating >= 5)
+        else if (noiseRating >= 20)
         {
             keepRunning = false;
             AlertNoise();
@@ -134,6 +134,8 @@ public class PlayerController : MonoBehaviour
 	{
 		if (endGame == true)
 		{
+			StopCoroutine("Countdown");
+			FreezeYAxis();
             winText.text = "You crossed the border safely! " + "\n" + "Press R to return to the menu.";
 			if (Input.GetKeyDown("r"))
 			{
